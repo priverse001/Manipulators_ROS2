@@ -1,31 +1,166 @@
-# Student Guide — Build the Arduinobot (ROS 2 + Arduino + MoveIt 2 + Alexa)
+# **Robotics Summer Camp — Manipulators (ROS 2) Student Guide**
 
-> Repo: `priverse001/Manipulators_ROS2`
+> **Repo:** `priverse001/Manipulators_ROS2`
 
-This guide walks students step‑by‑step through building the full robot project in this repository. It includes installation, workspace setup, URDF/Xacro modeling, ros2_control plugins, controllers, MoveIt 2, Arduino firmware, and Alexa integration. Students will complete templates and assemble a working simulated and/or real robot.
+Hope you all have completed the ROS installation. If not, view **Week 0 – Software Installation** first. We aim to deliver a beginner‑level understanding of ROS 2 and guide you step‑by‑step to build the complete **Arduinobot** project (simulation + real robot).
 
----
-
-## 0) Learning Outcomes
-By the end, students will be able to:
-- Create and build a ROS 2 workspace
-- Model a robot arm using URDF/Xacro
-- Configure Gazebo + ros2_control
-- Implement a hardware interface plugin (C++)
-- Configure controllers and MoveIt 2
-- Drive a real robot via Arduino serial
-- Extend control with voice (Alexa)
+**NOTE:** Always prefer the **official ROS 2 documentation** for any confusion. It’s the most reliable source:
+- https://docs.ros.org/en/humble/Tutorials.html
 
 ---
 
-## 1) Prerequisites
-### Operating System
-- Ubuntu 22.04 (native or VM)
+# **Week 1 — Introduction to ROS 2**
 
-### ROS 2
-- ROS 2 Humble
+## **Introduction**
+In this project (and most robotics projects), you will use **ROS 2** and **Python/C++**. Spend some time learning the basics first.
 
-### Required ROS 2 packages
+If you are not convinced about ROS 2, watch:
+- Bloomberg — *Building a Robot Operating System for the Future* (YouTube)
+
+ROS 2 is the successor to ROS 1 and provides:
+- Real‑time capabilities
+- Better security
+- Multi‑platform support (Linux, Windows, macOS)
+
+---
+
+## **Learning Resources (Must Read)**
+- **Linux Resources (optional)**
+- **ROS 2 Workspace**
+- **ROS 2 Package**
+- **ROS 2 Nodes**
+- **ROS 2 Launch**
+- **ROS 2 Topics**
+- **ROS 2 Services**
+- **ROS 2 Actions**
+- **Robotics Simulation Overview**
+
+> Always refer to **Google** or **ROS Wiki** if anything is unclear.
+
+---
+
+# **Week 2 — Linux Basics (Quick)**
+- Linux is an open‑source UNIX‑style operating system.
+- In this camp we use **Ubuntu 22.04 (Jammy Jellyfish)**.
+
+### More Detailed Resources (Do Refer!)
+- Linux File System Directories
+- Linux File Permissions
+- Linux File Commands (Important)
+- Shell Scripting
+
+---
+
+# **Week 3 — ROS 2 Workspace & Colcon**
+
+## **Prerequisites**
+### Configure Environment
+You must source ROS 2 before working:
+```bash
+source /opt/ros/humble/setup.bash
+```
+
+### Install colcon
+```bash
+sudo apt install python3-colcon-common-extensions
+```
+
+## **Workspace Basics**
+A ROS 2 workspace contains a `src` folder and is built using `colcon`.
+
+### Create a Workspace
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+```
+
+### Build
+```bash
+colcon build --symlink-install
+```
+
+### Source the Workspace
+```bash
+source install/setup.bash
+```
+
+---
+
+# **Week 4 — ROS 2 Package Basics**
+Create your own package:
+```bash
+ros2 pkg create <pkg-name> --dependencies [deps]
+```
+
+### C++ Package
+```bash
+ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_cmake
+```
+
+### Python Package
+```bash
+ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_python
+```
+
+---
+
+# **Week 5 — ROS 2 Nodes**
+Nodes are individual processes in the ROS graph.
+
+### Useful Commands
+```bash
+ros2 run <package> <executable>
+ros2 node list
+ros2 node info /node_name
+```
+
+---
+
+# **Week 6 — ROS 2 Launch**
+Launch files let you run multiple nodes at once.
+
+### Run a Launch File
+```bash
+ros2 launch <package> <launch_file.py>
+```
+
+---
+
+# **Week 7 — ROS 2 Topics, Services, Actions**
+### Topics
+- Continuous streams of data.
+
+### Services
+- Request/response.
+
+### Actions
+- Long‑running goals with feedback.
+
+---
+
+# **Week 8 — Simulation & Visualization**
+## RViz
+- Visualize robot model, sensors, TF, planning.
+
+## Gazebo (Classic / Ignition)
+- Simulate physics.
+- Use **ros_gz_bridge** for topic bridging in Ignition.
+
+---
+
+# **Week 9 — URDF & Xacro**
+URDF describes robot structure. Xacro helps reduce repetition.
+
+---
+
+# **PROJECT: ARDUINOBOT — Full Build Guide**
+
+## ✅ Goal
+Build the full ROS 2 robot arm (simulation + real hardware + MoveIt 2 + Alexa).
+
+---
+
+## **Step 1 — Install Project Dependencies**
 ```bash
 sudo apt-get update && sudo apt-get install -y \
   ros-humble-joint-state-publisher-gui \
@@ -34,71 +169,30 @@ sudo apt-get update && sudo apt-get install -y \
   ros-humble-ros2-controllers \
   ros-humble-moveit* \
   ros-humble-ros-gz-* \
-  ros-humble-*-ros2-control
-```
-
-### Development tools
-```bash
-sudo apt-get update && sudo apt-get install -y \
-  build-essential \
-  cmake \
-  git \
-  python3-pip \
-  libserial-dev
+  ros-humble-*-ros2-control \
+  libserial-dev \
+  python3-pip
 
 pip install pyserial
 ```
 
-### Arduino tooling
-- Arduino IDE
-- USB serial drivers (usually built‑in on Ubuntu)
-
 ---
 
-## 2) Workspace Setup
-```bash
-mkdir -p ~/arduinobot_ws/src
-cd ~/arduinobot_ws/src
-```
-
-Clone this repo (or fork it first):
+## **Step 2 — Clone Workspace**
 ```bash
 git clone https://github.com/priverse001/Manipulators_ROS2.git
+cd Manipulators_ROS2/Section9_Build/arduinobot_ws
 ```
-
-For the final build, we use:
-```
-Section9_Build/arduinobot_ws
-```
-
-Students can copy that workspace into `~/arduinobot_ws` or work directly inside it.
 
 ---
 
-## 3) Package Map (Final Project)
-Inside `Section9_Build/arduinobot_ws/src`:
-- **arduinobot_description** → URDF/Xacro, meshes, RViz
-- **arduinobot_controller** → ros2_control hardware plugin
-- **arduinobot_bringup** → launch files
-- **arduinobot_moveit** → MoveIt 2 configuration
-- **arduinobot_msgs** → custom ROS messages
-- **arduinobot_remote** → remote + Alexa bridge
-- **arduinobot_firmware** �� Arduino code
+## **Step 3 — URDF/Xacro Template (Students Fill)**
+Create/complete:
+- `arduinobot.urdf.xacro`
+- `arduinobot_gazebo.xacro`
+- `arduinobot_ros2_control.xacro`
 
----
-
-## 4) URDF/Xacro Modeling (Robot Description)
-### Goal
-Model the arm with proper links, joints, and limits.
-
-### Student Tasks
-1. Create a Xacro file with all links and joints.
-2. Add mesh visuals + collisions.
-3. Add correct joint axes and limits.
-4. Add a mimic joint for the gripper.
-
-### Template: `arduinobot.urdf.xacro`
-Fill in all TODOs.
+### **Template: `arduinobot.urdf.xacro`**
 ```xml
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arduinobot">
@@ -133,90 +227,17 @@ Fill in all TODOs.
     </visual>
   </link>
 
-  <!-- TODO: add all remaining links -->
+  <!-- TODO: Add all remaining links and joints -->
 
-  <joint name="joint_1" type="revolute">
-    <parent link="base_link"/>
-    <child link="base_plate"/>
-    <origin xyz="TODO"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-${PI/2}" upper="${PI/2}" effort="${effort}" velocity="${velocity}"/>
-  </joint>
-
-  <!-- TODO: joint_2, joint_3, joint_4, joint_5 (mimic) -->
 </robot>
 ```
 
 ---
 
-## 5) Gazebo + ros2_control Hooks
-### Template: `arduinobot_gazebo.xacro`
-```xml
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arduinobot">
-  <gazebo>
-    <xacro:if value="$(arg is_ignition)">
-      <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-        <parameters>$(find arduinobot_controller)/config/arduinobot_controllers.yaml</parameters>
-      </plugin>
-    </xacro:if>
-    <xacro:unless value="$(arg is_ignition)">
-      <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-        <parameters>$(find arduinobot_controller)/config/arduinobot_controllers.yaml</parameters>
-      </plugin>
-    </xacro:unless>
-  </gazebo>
-</robot>
-```
+## **Step 4 — ros2_control Plugin Template**
+Students must implement the **hardware interface** that communicates with Arduino.
 
-### Template: `arduinobot_ros2_control.xacro`
-```xml
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arduinobot">
-  <ros2_control name="RobotSystem" type="system">
-
-    <xacro:property name="PI" value="3.14159265359" />
-
-    <xacro:if value="$(arg is_sim)">
-      <xacro:if value="$(arg is_ignition)">
-        <hardware>
-          <plugin>ign_ros2_control/IgnitionSystem</plugin>
-        </hardware>
-      </xacro:if>
-      <xacro:unless value="$(arg is_ignition)">
-        <hardware>
-          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-        </hardware>
-      </xacro:unless>
-    </xacro:if>
-
-    <xacro:unless value="$(arg is_sim)">
-      <hardware>
-        <plugin>arduinobot_controller/ArduinobotInterface</plugin>
-        <param name="port">/dev/ttyACM0</param>
-      </hardware>
-    </xacro:unless>
-
-    <joint name="joint_1">
-      <command_interface name="position">
-        <param name="min">-${PI/2}</param>
-        <param name="max">${PI/2}</param>
-      </command_interface>
-      <state_interface name="position"/>
-    </joint>
-
-    <!-- TODO: add joint_2, joint_3, joint_4, joint_5 -->
-  </ros2_control>
-</robot>
-```
-
----
-
-## 6) ros2_control Hardware Interface Plugin
-### Goal
-Implement a hardware plugin that sends joint commands to Arduino over serial.
-
-### Template: `arduinobot_interface.hpp`
+### `arduinobot_interface.hpp`
 ```cpp
 #ifndef ARDUINOBOT_INTERFACE_H
 #define ARDUINOBOT_INTERFACE_H
@@ -259,76 +280,9 @@ private:
 #endif
 ```
 
-### Template: `arduinobot_interface.cpp`
-```cpp
-#include "arduinobot_controller/arduinobot_interface.hpp"
-#include <hardware_interface/types/hardware_interface_type_values.hpp>
-#include <pluginlib/class_list_macros.hpp>
-
-namespace arduinobot_controller {
-
-ArduinobotInterface::ArduinobotInterface() {}
-ArduinobotInterface::~ArduinobotInterface() {}
-
-CallbackReturn ArduinobotInterface::on_init(const hardware_interface::HardwareInfo &hardware_info) {
-  CallbackReturn result = hardware_interface::SystemInterface::on_init(hardware_info);
-  if (result != CallbackReturn::SUCCESS) return result;
-  // TODO: read port parameter
-  return CallbackReturn::SUCCESS;
-}
-
-std::vector<hardware_interface::StateInterface> ArduinobotInterface::export_state_interfaces() {
-  std::vector<hardware_interface::StateInterface> interfaces;
-  // TODO: create state interfaces
-  return interfaces;
-}
-
-std::vector<hardware_interface::CommandInterface> ArduinobotInterface::export_command_interfaces() {
-  std::vector<hardware_interface::CommandInterface> interfaces;
-  // TODO: create command interfaces
-  return interfaces;
-}
-
-CallbackReturn ArduinobotInterface::on_activate(const rclcpp_lifecycle::State &) {
-  // TODO: open serial port, init vectors
-  return CallbackReturn::SUCCESS;
-}
-
-CallbackReturn ArduinobotInterface::on_deactivate(const rclcpp_lifecycle::State &) {
-  // TODO: close serial port
-  return CallbackReturn::SUCCESS;
-}
-
-hardware_interface::return_type ArduinobotInterface::read(const rclcpp::Time &, const rclcpp::Duration &) {
-  // TODO: open-loop or read sensors
-  return hardware_interface::return_type::OK;
-}
-
-hardware_interface::return_type ArduinobotInterface::write(const rclcpp::Time &, const rclcpp::Duration &) {
-  // TODO: send serial commands
-  return hardware_interface::return_type::OK;
-}
-
-} // namespace
-
-PLUGINLIB_EXPORT_CLASS(arduinobot_controller::ArduinobotInterface, hardware_interface::SystemInterface)
-```
-
-### Plugin Export: `arduinobot_controller.xml`
-```xml
-<library path="arduinobot_controller">
-  <class name="arduinobot_controller/ArduinobotInterface"
-         type="arduinobot_controller::ArduinobotInterface"
-         base_class_type="hardware_interface::SystemInterface">
-    <description>Arduinobot Hardware Interface</description>
-  </class>
-</library>
-```
-
 ---
 
-## 7) Controllers Configuration
-### Template: `arduinobot_controllers.yaml`
+## **Step 5 — Controllers YAML Template**
 ```yaml
 controller_manager:
   ros__parameters:
@@ -352,64 +306,54 @@ controller_manager:
 
 ---
 
-## 8) Build + Run (Simulation)
+## **Step 6 — Build & Run (Simulation)**
 ```bash
 cd Section9_Build/arduinobot_ws
 colcon build
-. install/setup.bash
-```
-
-Launch simulation:
-```bash
+source install/setup.bash
 ros2 launch arduinobot_bringup simulated_robot.launch.py
 ```
 
 ---
 
-## 9) Build + Run (Real Robot)
-1. Upload Arduino firmware from `arduinobot_firmware`.
-2. Connect USB cable (check `/dev/ttyACM0`).
-3. Launch real robot:
+## **Step 7 — Build & Run (Real Robot)**
+1. Upload Arduino firmware (`arduinobot_firmware`).
+2. Connect USB (`/dev/ttyACM0`).
+3. Launch:
 ```bash
 ros2 launch arduinobot_bringup real_robot.launch.py
 ```
 
 ---
 
-## 10) MoveIt 2 Integration
-- Generate MoveIt config package.
-- Load robot description + controllers.
-- Plan motion in RViz.
+## **Step 8 — MoveIt 2**
+- Generate MoveIt config
+- Load robot description and controllers
+- Plan in RViz
 
 ---
 
-## 11) Alexa Integration (Optional)
-- Configure Alexa skill + ngrok tunnel
-- Map utterances to ROS commands
-- Test voice control
+## **Step 9 — Alexa Integration (Optional)**
+- Setup ngrok
+- Create Alexa skill
+- Map voice intents to robot commands
 
 ---
 
-## 12) Student Checklist
-- [ ] URDF + joints compile without errors
+# ✅ Student Checklist
+- [ ] ROS 2 installed and sourced
+- [ ] Workspace builds
+- [ ] URDF loads without errors
 - [ ] Gazebo spawns robot
-- [ ] ros2_control loads successfully
+- [ ] ros2_control plugin loads
 - [ ] MoveIt plans motion
-- [ ] Arduino responds to commands
-- [ ] Alexa triggers robot behavior
+- [ ] Arduino executes commands
+- [ ] Alexa voice commands work
 
 ---
 
-## 13) Evaluation Suggestions
-- **Pass**: Robot runs in simulation + MoveIt planning
-- **Merit**: Real robot moves from ROS commands
-- **Distinction**: Voice control via Alexa
-
----
-
-## 14) Helpful Commands
-```bash
-ros2 topic list
-ros2 control list_controllers
-ros2 run rqt_graph rqt_graph
-```
+# References
+- https://docs.ros.org/en/humble/Tutorials.html
+- https://docs.ros.org/en/humble/Concepts/Basic/About-Nodes.html
+- https://docs.ros.org/en/humble/Concepts/Basic/About-Services.html
+- https://docs.ros.org/en/humble/Concepts/Basic/About-Actions.html
