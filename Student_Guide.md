@@ -1,119 +1,43 @@
-# **Robotics-Summer-Camp 2026 — Manipulators (ROS 2 + Arduino + MoveIt 2 + Alexa)**
+# **Robotics Summer Camp 2026 — Manipulators Track (ROS 2 + Arduino + MoveIt 2 + Alexa)**
 
-Welcome to the Manipulators Summer Camp.
+Welcome to the **Manipulators Summer Camp**.
 
-Hope you all have completed the ROS installation. If not, complete **Week 0 — Software Installation** first. We aim to deliver a beginner‑level understanding of ROS 2 and then help you build a full end‑to‑end project from this repository: **a 3D‑printed robot arm powered by ROS 2 + Arduino, controlled via MoveIt 2, and extendable to Amazon Alexa**.
+This guide is written like camp notes: it includes **concept explanations**, **commands**, **what you must learn**, **mini-checkpoints**, and finally the **full project build steps** for the robot arm in this repository.
 
-**NOTE (Very Important):** Always prefer the official ROS docs (ROS Wiki) whenever you’re stuck. Most of the best explanations live there:
-
-- **ROS 2 Tutorials (Humble):** https://docs.ros.org/en/humble/Tutorials.html
-
----
-
-# **ROS (Robot Operating System) Basics**
-
-## Introduction
-In this theme (and most robotics projects), you will use:
-- **ROS 2** (Robot middleware)
-- **Python and/or C++** (programming)
-- **Gazebo + RViz** (simulation + visualization)
-- **URDF/Xacro** (robot modeling)
-- **ros2_control** (controllers + hardware plugins)
-- **MoveIt 2** (motion planning)
-
-If you’re not convinced about ROS, here’s a video worth watching:
-
-- **Bloomberg — Building a Robot Operating System for the Future (YouTube)**
-
-ROS 2 is the successor to ROS 1. It was redesigned to provide better:
-- real‑time support
-- security
-- multi‑robot / multi‑computer networking
+> **Golden rule:** Whenever you are stuck, search the official ROS docs first:
+> - ROS 2 Humble Tutorials: https://docs.ros.org/en/humble/Tutorials.html
 
 ---
 
-## Here are the Learning Resources for ROS 2 Basics
-Below is the exact set of headings/resources you must learn (same structure as previous year). If a link is missing here, use ROS docs.
+# **Phase 1 — ROS 2 Foundations + TurtleBot3 Simulation (Warm‑up Track)**
 
-### Linux Resources (optional)
-- Linux File System Directories
-- Linux File Permissions
-- Linux File Commands (Important)
-- Shell Scripting
+## **Week 0 — Software Installation (Mandatory)**
 
-### ROS 2 Workspace
-You must understand:
-- `src/`, `build/`, `install/`, `log/`
-- underlay vs overlay
-- sourcing setup files
-- `colcon build --symlink-install`
+### 0.1 Operating System
+- Use **Ubuntu 22.04** (native recommended; VM possible but Gazebo can be heavy).
 
-### ROS 2 Package
-You must understand:
-- package types: `ament_cmake`, `ament_python`
-- package.xml dependencies
-- install rules for launch/config/urdf
+### 0.2 Install ROS 2 Humble
+Install ROS 2 Humble using the official Debian packages method.
 
-### ROS 2 Nodes
-You must understand:
-- node lifecycle (conceptually)
-- node names, namespaces
-- publishers/subscribers/services/actions
+Verify:
+```bash
+ros2 --help
+ros2 doctor --report
+```
 
-### ROS 2 Launch
-You must understand:
-- LaunchDescription, Node actions
-- arguments, parameters, remaps
+### 0.3 Configure ROS environment (important)
+Temporary (per terminal):
+```bash
+source /opt/ros/humble/setup.bash
+```
 
-### ROS 2 Topic
-You must understand:
-- pub/sub model
-- message types
-- `ros2 topic echo`, `ros2 topic info`, `ros2 topic pub`
+Permanent (recommended):
+```bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
 
-### ROS 2 Service
-You must understand:
-- request/response
-- `ros2 service list`, `ros2 service type`, `ros2 service call`
-
-### ROS 2 Action
-You must understand:
-- goal/feedback/result
-- cancelable long‑running tasks
-- `ros2 action list`, `ros2 action send_goal --feedback`
-
-### Robotics Simulation Overview
-You must understand:
-- RViz vs Gazebo
-- how robot_description is used
-- TF tree basics
-
----
-
-## Always refer Google or ROS Wiki for any confusion
-They are the best resources for learning.
-
----
-
-# **Python Basics (Required)**
-If you’re weak in Python, revise:
-- variables, functions
-- classes
-- lists/dicts
-- reading files
-- virtual environments
-
----
-
-# **Week 0 — Software Installation (Mandatory)**
-
-## Install OS
-- Ubuntu 22.04
-
-## Install ROS 2 Humble
-Follow ROS docs (Debian install).
-
-## Install extra ROS packages used by this repo
+### 0.4 Install required dependencies for this camp
 ```bash
 sudo apt-get update && sudo apt-get install -y \
   ros-humble-joint-state-publisher-gui \
@@ -125,7 +49,7 @@ sudo apt-get update && sudo apt-get install -y \
   ros-humble-*-ros2-control
 ```
 
-## Install build + serial dependencies
+### 0.5 Install build tools + serial libraries
 ```bash
 sudo apt-get update && sudo apt-get install -y \
   build-essential \
@@ -137,143 +61,184 @@ sudo apt-get update && sudo apt-get install -y \
 pip install pyserial
 ```
 
-## Install tools
-- VS Code
-- Arduino IDE
+### 0.6 Install tools
+- VS Code (recommended)
+- Arduino IDE (mandatory for real robot)
+
+✅ **Checkpoint:** `ros2 doctor --report` works.
 
 ---
 
-# **Week 1 — Introduction to ROS 2**
+## **Week 1 — ROS 2 Basics (Big Picture)**
 
-## Introduction
-ROS 2, the successor to ROS 1, is an open-source framework that provides tools, libraries, and conventions to simplify creating complex and robust robot behaviors across various platforms.
+### What is ROS 2?
+ROS 2 is a framework for building robot software as **multiple small programs (nodes)** that communicate via:
+- Topics (streaming data)
+- Services (request/response)
+- Actions (long-running tasks)
+- Parameters (runtime configuration)
 
-### Minimum Learning Targets
-Students must be comfortable with:
-- Workspace creation and building
-- Package creation (C++ and Python)
-- Running nodes
-- Launching systems with launch files
-- Using topics/services/actions
+### What you must learn this week
+- Workspaces + colcon
+- Packages (C++ + Python)
+- Nodes
+- Launch files
+- Topics, services, actions
+- Simulation basics (RViz + Gazebo)
+- URDF/Xacro basics
 
----
-
-# **Week 2 — Linux Basics (Quick)**
-- Linux is a family of open source and community-developed operating systems.
-- Linux is a UNIX-style OS written in C and Assembly by Linus Torvalds and the Linux community.
-
-### More Detailed Resources (Do Refer!)
-- Linux File System Directories
-- Linux File Permissions
-- Linux File Commands (Important)
-- Shell Scripting
+✅ **Checkpoint:** You can explain the difference between *topic vs service vs action*.
 
 ---
 
-# **Week 3 — ROS 2 Workspace & Colcon**
+## **Week 2 — Linux Basics (Quick, but essential)**
 
-## Prerequisites
-### Configure ROS 2 environment
-Temporary:
+You must be comfortable with:
+- Navigation: `cd`, `ls`, `pwd`
+- File ops: `cp`, `mv`, `rm`, `mkdir`, `touch`
+- Searching: `grep`, `find`
+- Permissions: `chmod`, `chown`
+- Process checks: `ps`, `top`, `htop`
+- Serial devices: `/dev/ttyACM0`, `/dev/ttyUSB0`
+
+✅ **Checkpoint:**
 ```bash
-source /opt/ros/humble/setup.bash
+ls -l
+chmod +x script.sh
+grep -R "some_text" .
 ```
-Permanent:
-```bash
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
-source ~/.bashrc
-```
+
+---
+
+## **Week 3 — ROS 2 Workspace + colcon**
+
+### What is a workspace?
+A ROS 2 workspace is a folder that contains ROS packages in `src/`.
+
+colcon generates:
+- `build/` → build files
+- `install/` → installed artifacts
+- `log/` → logs
 
 ### Install colcon
 ```bash
 sudo apt install python3-colcon-common-extensions
 ```
 
-## Workspace Basics
-A workspace is a directory containing ROS 2 packages.
-
-colcon creates:
-- `build/`
-- `install/`
-- `log/`
-
-### Create a workspace
+### Create and build a workspace
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
-```
-
-### Build
-```bash
 colcon build --symlink-install
-```
-
-### Source
-```bash
 source install/setup.bash
 ```
 
----
-
-# **Week 4 — ROS 2 Package**
-
-## Creating a package
+✅ **Checkpoint:**
 ```bash
-ros2 pkg create <pkg-name> --dependencies [deps]
-```
-
-### C++
-```bash
-ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_cmake
-```
-
-### Python
-```bash
-ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_python
+echo $AMENT_PREFIX_PATH
 ```
 
 ---
 
-# **Week 5 — ROS 2 Nodes**
+## **Week 4 — ROS 2 Packages (C++ and Python)**
 
-A node is a participant in the ROS 2 graph. Nodes can:
-- publish / subscribe topics
-- offer / call services
-- run action clients / servers
-- provide parameters
-
-## Commands
+### Create a package
 ```bash
-ros2 run <package_name> <executable_name>
+ros2 pkg create <pkg-name> --dependencies <deps>
+```
+
+C++:
+```bash
+ros2 pkg create my_cpp_pkg --build-type ament_cmake --dependencies rclcpp
+```
+
+Python:
+```bash
+ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
+```
+
+### What students must understand
+- `package.xml` declares dependencies
+- C++ uses `CMakeLists.txt`
+- Python uses `setup.py`, `setup.cfg`
+- launch/config/urdf must be installed to `share/<pkg>`
+
+✅ **Checkpoint:**
+```bash
+ros2 pkg list | head
+ros2 pkg prefix rclcpp
+```
+
+---
+
+## **Week 5 — ROS 2 Nodes**
+
+### What is a node?
+A node is a program that does one job (sensor reading, control, planning, etc.).
+
+### Commands you MUST know
+```bash
+ros2 run <package> <executable>
 ros2 node list
 ros2 node info /node_name
 ```
 
----
-
-# **Week 6 — ROS 2 Launch**
-
-Launch files automate running many nodes.
-
-## Run
+### Practice (turtlesim)
+Install if needed:
 ```bash
-ros2 launch <package_name> <launch_file_name>
+sudo apt-get install ros-humble-turtlesim
 ```
 
-What students must learn:
-- LaunchDescription
-- Node
-- arguments
-- parameters
-- remappings
+Run:
+```bash
+ros2 run turtlesim turtlesim_node
+```
+
+✅ **Checkpoint:**
+```bash
+ros2 node list
+```
 
 ---
 
-# **Week 7 — ROS 2 Services**
+## **Week 6 — ROS 2 Launch**
 
-Services are call-and-response communication.
+### Why launch?
+Launch files start multiple nodes with one command.
 
-## Commands
+Run:
+```bash
+ros2 launch <package> <launch_file.py>
+```
+
+Students must learn:
+- LaunchDescription
+- Node actions
+- parameters
+- remappings
+- namespaces
+
+✅ **Checkpoint:** You can run a launch file from an installed package.
+
+---
+
+## **Week 7 — Topics / Services / Actions**
+
+### Topics
+Concept:
+- Publishers send messages
+- Subscribers receive continuously
+
+Commands:
+```bash
+ros2 topic list
+ros2 topic info /topic
+ros2 topic echo /topic
+ros2 topic pub /topic <type> "{yaml: value}"
+```
+
+### Services
+Commands:
 ```bash
 ros2 service list
 ros2 service list -t
@@ -282,74 +247,106 @@ ros2 interface show <srv_type>
 ros2 service call /service <srv_type> "{yaml: args}"
 ```
 
----
-
-# **Week 8 — ROS 2 Actions**
-
-Actions are for long running tasks: goal, feedback, result.
-
-## Commands
+### Actions
+Commands:
 ```bash
 ros2 action list
 ros2 action list -t
 ros2 action info /action
 ros2 interface show <action_type>
-ros2 action send_goal /action <action_type> "{goal_yaml}" --feedback
+ros2 action send_goal /action <action_type> "{yaml: goal}" --feedback
 ```
+
+✅ **Checkpoint:** Using turtlesim, demonstrate:
+- one topic echo
+- one service call
+- one action goal
 
 ---
 
-# **Week 9 — Robotics Simulation Overview (RViz, Gazebo, URDF, Xacro)**
+## **Week 8 — Simulation & Visualization Overview**
 
-## RViz
-- visualize robot model
-- visualize TF frames
-- visualize sensor data
+### RViz
+Use RViz for:
+- robot model visualization
+- TF frames
+- MoveIt planning scene
 
-## Gazebo
-### Gazebo Classic
+### Gazebo
+Gazebo is used for physics simulation.
+
+Gazebo Classic:
 ```bash
 ros2 launch gazebo_ros gazebo.launch.py
 ```
 
-### New Gazebo (gz / ignition)
+New Gazebo (gz):
 ```bash
 ros2 launch ros_gz_sim gz_sim.launch.py
 ```
 
-## URDF
-- unified robot description format
+### RQT
+```bash
+ros2 run rqt_gui rqt
+ros2 run rqt_graph rqt_graph
+ros2 run rqt_plot rqt_plot
+ros2 run rqt_console rqt_console
+```
 
-## Xacro
-- XML macros for cleaner URDF
+✅ **Checkpoint:** Use `rqt_graph` to visualize nodes and topics.
 
 ---
 
-# **(Intermission) TurtleBot3 & Simulation (Extra Practice)**
+## **Week 9 — URDF & Xacro**
+
+### URDF
+URDF describes:
+- links
+- joints
+- collisions
+- inertials
+
+### Xacro
+Xacro adds:
+- macros
+- properties
+- includes
+
+✅ **Checkpoint:** You can run xacro expansion on a simple robot.
+
+---
+
+# **TurtleBot3 Module (Phase 1 Final Lab)**
+
+This lab is intentionally placed **right before the manipulator project**. It gives confidence in:
+- cloning multiple repos
+- rosdep
+- colcon
+- Gazebo simulation
+- teleoperation
 
 ## What is a TurtleBot3?
-TurtleBot3 is a small, affordable, programmable, ROS-based mobile robot for education and research.
+TurtleBot3 is a small, affordable, programmable, ROS-based mobile robot.
 
 ### Key Features
-- Modular hardware (Burger/Waffle/Waffle Pi)
-- Open-source ROS 2 packages
-- Compact and customizable
-
-### Software Architecture
-- ROS 2 nodes: driver, teleop, sensors
-- Launch files for bringup and simulation
+- Modular hardware: Burger / Waffle / Waffle Pi
+- ROS 2 packages support SLAM, navigation, simulation
+- Easy to run in Gazebo
 
 ---
 
-## Install TurtleBot3 Simulation (Humble)
+## Install TurtleBot3 Simulation (ROS 2 Humble)
 
 ### Create workspace & clone repos
 ```bash
 mkdir -p ~/turtlebot3_ws/src && cd ~/turtlebot3_ws/src
 
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
+
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 ```
 
@@ -366,8 +363,11 @@ colcon build --symlink-install
 Add to `~/.bashrc`:
 ```bash
 echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
+
 echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc
+
 echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+
 echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/models' >> ~/.bashrc
 ```
 
@@ -376,49 +376,58 @@ Apply:
 source ~/.bashrc
 ```
 
-### Choose model
+### Choose a model
 ```bash
 export TURTLEBOT3_MODEL=waffle
 ```
 
-### Run
+### Run simulations
 Empty world:
 ```bash
 ros2 launch turtlebot3_gazebo empty_world.launch.py
 ```
 
-Turtlebot3 world:
+TurtleBot3 world:
 ```bash
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 ```
 
-House:
+House world:
 ```bash
 ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
 ```
 
-Teleop:
+### Teleop
+In a new terminal:
 ```bash
 export TURTLEBOT3_MODEL=burger
 ros2 run turtlebot3_teleop teleop_keyboard
 ```
 
+Controls:
+- `w/x`: increase/decrease linear velocity
+- `a/d`: increase/decrease angular velocity
+- `s`: stop
+- `Ctrl+C`: exit
+
+✅ **Checkpoint:** Drive the robot around the map using teleop.
+
 ---
 
 ## TurtleBot3 Gazebo Fortress Simulation (Optional Advanced)
 
-### Dependencies
+### Install dependencies
 ```bash
 sudo apt update
 sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs
 ```
 
-### Ignition bridge packages
+### Install bridge packages
 ```bash
 sudo apt update && sudo apt install -y \
-ros-humble-ros-ign ros-humble-ros-ign-bridge \
-ros-humble-ros-ign-gazebo ros-humble-ros-ign-gazebo-demos \
-ros-humble-ros-ign-image ignition-fortress
+  ros-humble-ros-ign ros-humble-ros-ign-bridge \
+  ros-humble-ros-ign-gazebo ros-humble-ros-ign-gazebo-demos \
+  ros-humble-ros-ign-image ignition-fortress
 ```
 
 ### Build & source
@@ -431,10 +440,11 @@ source install/setup.bash
 
 ---
 
-# **MAIN PROJECT — Build the Robot Arm in This Repo**
+# **Phase 2 — Main Project: Build the Robot Arm in This Repo**
 
 ## Repository Target
 We will use the final integrated workspace:
+
 - `Section9_Build/arduinobot_ws`
 
 Inside `Section9_Build/arduinobot_ws/src` you will find:
@@ -621,7 +631,7 @@ Students must learn:
 # ✅ Final Checklist
 - [ ] ROS 2 + dependencies installed
 - [ ] Workspace builds
-- [ ] TurtleBot3 sim runs (practice)
+- [ ] TurtleBot3 sim runs (Phase 1)
 - [ ] URDF loads without errors
 - [ ] Simulation starts for robot arm
 - [ ] Real robot communicates over serial
@@ -630,8 +640,12 @@ Students must learn:
 
 ---
 
-# References
-- https://docs.ros.org/en/humble/Tutorials.html
-- https://docs.ros.org/en/humble/Concepts/Basic/About-Nodes.html
-- https://docs.ros.org/en/humble/Concepts/Basic/About-Services.html
-- https://docs.ros.org/en/humble/Concepts/Basic/About-Actions.html
+# References (Official)
+- ROS 2 Tutorials: https://docs.ros.org/en/humble/Tutorials.html
+- Nodes concept: https://docs.ros.org/en/humble/Concepts/Basic/About-Nodes.html
+- Topics concept: https://docs.ros.org/en/humble/Concepts/Basic/About-Topics.html
+- Services concept: https://docs.ros.org/en/humble/Concepts/Basic/About-Services.html
+- Actions concept: https://docs.ros.org/en/humble/Concepts/Basic/About-Actions.html
+- Launch system: https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Launch-Main.html
+- URDF tutorials: https://docs.ros.org/en/humble/Tutorials/Intermediate/URDF/URDF-Main.html
+- ros2_control: https://control.ros.org/
