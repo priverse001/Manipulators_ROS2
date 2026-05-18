@@ -106,6 +106,7 @@ If you’re weak in Python, revise:
 ---
 
 # **Week 0 — Software Installation (Mandatory)**
+
 ## Install OS
 - Ubuntu 22.04
 
@@ -142,18 +143,42 @@ pip install pyserial
 
 ---
 
-# **Week 1 — ROS 2 Workspace**
+# **Week 1 — Introduction to ROS 2**
+
+## Introduction
+ROS 2, the successor to ROS 1, is an open-source framework that provides tools, libraries, and conventions to simplify creating complex and robust robot behaviors across various platforms.
+
+### Minimum Learning Targets
+Students must be comfortable with:
+- Workspace creation and building
+- Package creation (C++ and Python)
+- Running nodes
+- Launching systems with launch files
+- Using topics/services/actions
+
+---
+
+# **Week 2 — Linux Basics (Quick)**
+- Linux is a family of open source and community-developed operating systems.
+- Linux is a UNIX-style OS written in C and Assembly by Linus Torvalds and the Linux community.
+
+### More Detailed Resources (Do Refer!)
+- Linux File System Directories
+- Linux File Permissions
+- Linux File Commands (Important)
+- Shell Scripting
+
+---
+
+# **Week 3 — ROS 2 Workspace & Colcon**
 
 ## Prerequisites
-### Configure ROS 2 Environment
-You need ROS 2 available in every terminal.
-
-Temporary (per terminal):
+### Configure ROS 2 environment
+Temporary:
 ```bash
 source /opt/ros/humble/setup.bash
 ```
-
-Permanent (recommended):
+Permanent:
 ```bash
 echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 source ~/.bashrc
@@ -165,61 +190,57 @@ sudo apt install python3-colcon-common-extensions
 ```
 
 ## Workspace Basics
-A ROS 2 workspace is a directory that usually contains a `src` directory.
+A workspace is a directory containing ROS 2 packages.
 
-colcon generates:
-- `build/` (intermediate build artifacts)
-- `install/` (final installed artifacts)
-- `log/` (build logs)
+colcon creates:
+- `build/`
+- `install/`
+- `log/`
 
-## Create a workspace
+### Create a workspace
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
 ```
 
-## Build the workspace
+### Build
 ```bash
 colcon build --symlink-install
 ```
 
-## Source the environment
+### Source
 ```bash
 source install/setup.bash
 ```
 
-## Tips
-- To ignore a package: create an empty `COLCON_IGNORE` file in it.
-
 ---
 
-# **Week 2 — ROS 2 Packages**
+# **Week 4 — ROS 2 Package**
 
-## Create a package
+## Creating a package
 ```bash
 ros2 pkg create <pkg-name> --dependencies [deps]
 ```
 
-## C++ package
+### C++
 ```bash
 ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_cmake
 ```
 
-## Python package
+### Python
 ```bash
 ros2 pkg create <pkg-name> --dependencies [deps] --build-type ament_python
 ```
 
 ---
 
-# **Week 3 — ROS 2 Nodes**
+# **Week 5 — ROS 2 Nodes**
 
-## What is a node?
-A node is a participant in the ROS 2 graph. Nodes communicate via:
-- topics
-- services
-- actions
-- parameters
+A node is a participant in the ROS 2 graph. Nodes can:
+- publish / subscribe topics
+- offer / call services
+- run action clients / servers
+- provide parameters
 
 ## Commands
 ```bash
@@ -230,110 +251,190 @@ ros2 node info /node_name
 
 ---
 
-# **Week 4 — ROS 2 Launch**
+# **Week 6 — ROS 2 Launch**
 
-Launch is used to start multiple nodes with one command.
+Launch files automate running many nodes.
 
 ## Run
 ```bash
 ros2 launch <package_name> <launch_file_name>
 ```
 
-## What students must learn
+What students must learn:
 - LaunchDescription
 - Node
+- arguments
 - parameters
 - remappings
-- namespaces
 
 ---
 
-# **Week 5 — ROS 2 Services**
+# **Week 7 — ROS 2 Services**
 
-Services are request/response.
+Services are call-and-response communication.
 
 ## Commands
 ```bash
 ros2 service list
 ros2 service list -t
-ros2 service type /service_name
+ros2 service type /service
 ros2 interface show <srv_type>
-ros2 service call /service_name <srv_type> "{yaml: args}"
+ros2 service call /service <srv_type> "{yaml: args}"
 ```
 
 ---
 
-# **Week 6 — ROS 2 Actions**
+# **Week 8 — ROS 2 Actions**
 
-Actions are for long running tasks.
+Actions are for long running tasks: goal, feedback, result.
 
 ## Commands
 ```bash
 ros2 action list
 ros2 action list -t
-ros2 action info /action_name
+ros2 action info /action
 ros2 interface show <action_type>
-ros2 action send_goal /action_name <action_type> "{yaml: goal}" --feedback
+ros2 action send_goal /action <action_type> "{goal_yaml}" --feedback
 ```
 
 ---
 
-# **Week 7 — Simulation + Visualization Overview**
-
-> This section is a quick overview of tools. You must explore each deeper while doing the project.
+# **Week 9 — Robotics Simulation Overview (RViz, Gazebo, URDF, Xacro)**
 
 ## RViz
-RViz is used for:
-- viewing robot model
-- TF frames
-- sensor data
-- MoveIt planning scene
+- visualize robot model
+- visualize TF frames
+- visualize sensor data
 
 ## Gazebo
-Gazebo simulates physics.
-
-### Gazebo Classic (Gazebo 11)
+### Gazebo Classic
 ```bash
 ros2 launch gazebo_ros gazebo.launch.py
 ```
 
-### New Gazebo (Ignition / gz)
+### New Gazebo (gz / ignition)
 ```bash
 ros2 launch ros_gz_sim gz_sim.launch.py
 ```
 
-### RQT tools
+## URDF
+- unified robot description format
+
+## Xacro
+- XML macros for cleaner URDF
+
+---
+
+# **(Intermission) TurtleBot3 & Simulation (Extra Practice)**
+
+## What is a TurtleBot3?
+TurtleBot3 is a small, affordable, programmable, ROS-based mobile robot for education and research.
+
+### Key Features
+- Modular hardware (Burger/Waffle/Waffle Pi)
+- Open-source ROS 2 packages
+- Compact and customizable
+
+### Software Architecture
+- ROS 2 nodes: driver, teleop, sensors
+- Launch files for bringup and simulation
+
+---
+
+## Install TurtleBot3 Simulation (Humble)
+
+### Create workspace & clone repos
 ```bash
-ros2 run rqt_gui rqt
-ros2 run rqt_graph rqt_graph
-ros2 run rqt_plot rqt_plot
-ros2 run rqt_console rqt_console
+mkdir -p ~/turtlebot3_ws/src && cd ~/turtlebot3_ws/src
+
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
+```
+
+### Install dependencies & build
+```bash
+cd ~/turtlebot3_ws
+sudo rosdep init  # skip if already done
+rosdep update
+rosdep install --from-paths src --ignore-src --rosdistro humble -y
+colcon build --symlink-install
+```
+
+### Setup environment variables
+Add to `~/.bashrc`:
+```bash
+echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
+echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc
+echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/turtlebot3_ws/src/turtlebot3_simulations/turtlebot3_gazebo/models' >> ~/.bashrc
+```
+
+Apply:
+```bash
+source ~/.bashrc
+```
+
+### Choose model
+```bash
+export TURTLEBOT3_MODEL=waffle
+```
+
+### Run
+Empty world:
+```bash
+ros2 launch turtlebot3_gazebo empty_world.launch.py
+```
+
+Turtlebot3 world:
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+
+House:
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
+```
+
+Teleop:
+```bash
+export TURTLEBOT3_MODEL=burger
+ros2 run turtlebot3_teleop teleop_keyboard
 ```
 
 ---
 
-# **Week 8 — URDF + Xacro**
+## TurtleBot3 Gazebo Fortress Simulation (Optional Advanced)
 
-## URDF
-URDF describes:
-- links
-- joints
-- collision
-- inertia
+### Dependencies
+```bash
+sudo apt update
+sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs
+```
 
-## Xacro
-Xacro helps:
-- reuse macros
-- define properties
-- split robot into multiple files
+### Ignition bridge packages
+```bash
+sudo apt update && sudo apt install -y \
+ros-humble-ros-ign ros-humble-ros-ign-bridge \
+ros-humble-ros-ign-gazebo ros-humble-ros-ign-gazebo-demos \
+ros-humble-ros-ign-image ignition-fortress
+```
+
+### Build & source
+```bash
+sudo apt-get install ros-${ROS_DISTRO}-dynamixel-sdk
+rosdep install --from-paths src --ignore-src -r -y
+colcon build
+source install/setup.bash
+```
 
 ---
 
-# **MAIN PROJECT — Build the Robot in This Repo**
+# **MAIN PROJECT — Build the Robot Arm in This Repo**
 
 ## Repository Target
 We will use the final integrated workspace:
-
 - `Section9_Build/arduinobot_ws`
 
 Inside `Section9_Build/arduinobot_ws/src` you will find:
@@ -342,7 +443,6 @@ Inside `Section9_Build/arduinobot_ws/src` you will find:
 - `arduinobot_bringup` (launch)
 - `arduinobot_moveit` (MoveIt config)
 - `arduinobot_firmware` (Arduino)
-- others (examples, msgs, remote)
 
 ---
 
@@ -358,13 +458,13 @@ source install/setup.bash
 
 ---
 
-## Step 2 — Understand + Complete URDF/Xacro
-You must edit the robot description:
-- `Section9_Build/arduinobot_ws/src/arduinobot_description/urdf/arduinobot.urdf.xacro`
+## Step 2 — Complete URDF/Xacro (Students Fill Templates)
+Edit:
+- `.../arduinobot.urdf.xacro`
 - `.../arduinobot_gazebo.xacro`
 - `.../arduinobot_ros2_control.xacro`
 
-### Student Template (fill TODOs)
+Template:
 ```xml
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arduinobot">
@@ -376,49 +476,34 @@ You must edit the robot description:
   <xacro:include filename="$(find arduinobot_description)/urdf/arduinobot_ros2_control.xacro" />
 
   <xacro:property name="PI" value="3.14159265359" />
-  <xacro:property name="effort" value="30.0" />
-  <xacro:property name="velocity" value="10.0" />
 
-  <xacro:macro name="default_inertial" params="mass">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="${mass}" />
-      <inertia ixx="1.0" ixy="0.0" ixz="0.0"
-               iyy="1.0" iyz="0.0"
-               izz="1.0" />
-    </inertial>
-  </xacro:macro>
-
-  <!-- TODO: Add all links (base, arms, gripper) and joints -->
+  <!-- TODO: Add all links and joints -->
 
 </robot>
 ```
 
 ---
 
-## Step 3 — ros2_control (what students must understand)
+## Step 3 — ros2_control overview
 ros2_control consists of:
-- **controller_manager** (loads controllers)
-- **controllers** (like JointTrajectoryController)
-- **hardware interface plugin** (SystemInterface) for real robot
+- controller_manager
+- controllers
+- hardware interface plugin
 
-### In this repo
-- Simulation uses `ign_ros2_control` or `gz_ros2_control`
-- Real robot uses `arduinobot_controller/ArduinobotInterface`
+In this repo:
+- sim uses gz/ign ros2_control
+- real uses `arduinobot_controller/ArduinobotInterface`
 
 ---
 
-## Step 4 — Hardware Interface Plugin Template (students implement)
-Path in repo:
-- `Section9_Build/arduinobot_ws/src/arduinobot_controller/include/arduinobot_controller/arduinobot_interface.hpp`
-- `Section9_Build/arduinobot_ws/src/arduinobot_controller/src/arduinobot_interface.cpp`
+## Step 4 — Hardware Interface Plugin Template
+Students implement serial communication.
 
-Students must:
-- read port from URDF ros2_control params
-- export command/state interfaces
-- send serial commands to Arduino
+Path:
+- `.../include/.../arduinobot_interface.hpp`
+- `.../src/arduinobot_interface.cpp`
 
-### Template Header
+Template header:
 ```cpp
 #ifndef ARDUINOBOT_INTERFACE_H
 #define ARDUINOBOT_INTERFACE_H
@@ -465,9 +550,9 @@ private:
 
 ---
 
-## Step 5 — Controller YAML (students must understand)
-Path in repo:
-- `Section9_Build/arduinobot_ws/src/arduinobot_controller/config/arduinobot_controllers.yaml`
+## Step 5 — Controllers YAML
+Path:
+- `.../config/arduinobot_controllers.yaml`
 
 Template:
 ```yaml
@@ -503,9 +588,9 @@ ros2 launch arduinobot_bringup simulated_robot.launch.py
 ---
 
 ## Step 7 — Run Real Robot
-1) Upload Arduino code from `arduinobot_firmware` using Arduino IDE.
+1) Upload Arduino code from `arduinobot_firmware`.
 
-2) Confirm serial port:
+2) Confirm port:
 ```bash
 ls /dev/ttyACM*
 ```
@@ -519,29 +604,26 @@ ros2 launch arduinobot_bringup real_robot.launch.py
 
 ## Step 8 — MoveIt 2
 Students must learn:
-- robot model in MoveIt
 - planning groups
 - controllers integration
-- RViz MoveIt plugin
-
-Run MoveIt launch from `arduinobot_moveit` (check its launch files).
+- RViz planning
 
 ---
 
-## Step 9 — Alexa Integration
+## Step 9 — Alexa Integration (Optional)
 Students must learn:
-- ngrok basics
-- Alexa skill intents
-- mapping intent → ROS command
+- ngrok
+- Alexa intents
+- mapping voice -> ROS
 
 ---
 
 # ✅ Final Checklist
 - [ ] ROS 2 + dependencies installed
-- [ ] Workspace builds with `colcon build`
+- [ ] Workspace builds
+- [ ] TurtleBot3 sim runs (practice)
 - [ ] URDF loads without errors
-- [ ] Simulation starts
-- [ ] ros2_control controllers load
+- [ ] Simulation starts for robot arm
 - [ ] Real robot communicates over serial
 - [ ] MoveIt planning works
 - [ ] Alexa integration works (optional)
